@@ -31,8 +31,8 @@ export const addPrescription = async (data) => {
   return res.data;
 };
 
-export const updatePrescription = (id, data) =>
-  axiosInstance.put(`/prescriptions/${id}`, data).then((res) => res.data);
+export const updatePrescription = ( data ) =>
+  axiosInstance.put(`/prescriptions`, data).then((res) => res.data);
 
 export const getPrescriptions = async () => {
   const res = await axios.get(`${API_BASE_URL}/prescriptions`);

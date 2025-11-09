@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { addPrescription, getPrescriptionById } from "../services/api";
+import { addPrescription, getPrescriptionById, updatePrescription } from "../services/api";
 
 export default function AddPrescription() {
   const { id } = useParams();
@@ -16,6 +16,7 @@ export default function AddPrescription() {
     medicines: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch existing prescription if editing
@@ -41,19 +42,60 @@ export default function AddPrescription() {
     }
   }, [id]);
 
+  const validateField = (name, value) => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    switch (name) {
+      case 'patientName':
+        return !value.trim() ? 'Patient Name is required' : '';
+      case 'patientAge':
+        return !value ? 'Patient Age is required' : 
+               parseInt(value) < 0 ? 'Age cannot be negative' : '';
+      case 'patientGender':
+        return !value.trim() ? 'Patient Gender is required' : '';
+      case 'prescriptionDate':
+        return !value ? 'Prescription Date is required' : 
+               value < today ? 'Prescription Date cannot be in the past' : '';
+      case 'nextVisitDate':
+        return value && value < today ? 'Next Visit Date cannot be in the past' : '';
+      default:
+        return '';
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    const error = validateField(name, value);
+    setErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate all fields before submission
+    const newErrors = {};
+    Object.keys(formData).forEach(field => {
+      const error = validateField(field, formData[field]);
+      if (error) newErrors[field] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       if (id) {
         // PUT request for edit (you may need to define it)
-        await addPrescription({ ...formData, id }); // or updatePrescription()
+        formData.id = id;
+        await updatePrescription( formData ); // or updatePrescription()
         alert("Prescription updated successfully!");
       } else {
         await addPrescription(formData);
@@ -75,30 +117,43 @@ export default function AddPrescription() {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="patientName"
-          value={formData.patientName}
-          onChange={handleChange}
-          placeholder="Patient Name"
-          className="w-full border rounded p-2"
-          required
-        />
-        <input
-          name="patientAge"
-          value={formData.patientAge}
-          onChange={handleChange}
-          placeholder="Patient Age"
-          type="number"
-          className="w-full border rounded p-2"
-          required
-        />
-        <input
-          name="patientGender"
-          value={formData.patientGender}
-          onChange={handleChange}
+        <div className="space-y-1">
+          <input
+            name="patientName"
+            value={formData.patientName}
+            onChange={handleChange}
+            placeholder="Patient Name"
+            className={`w-full border rounded p-2 ${errors.patientName ? 'border-red-500' : ''}`}
+          />
+          {errors.patientName && (
+            <p className="text-red-500 text-sm">{errors.patientName}</p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <input
+            name="patientAge"
+            value={formData.patientAge}
+            onChange={handleChange}
+            placeholder="Patient Age"
+            type="number"
+            className={`w-full border rounded p-2 ${errors.patientAge ? 'border-red-500' : ''}`}
+          />
+          {errors.patientAge && (
+            <p className="text-red-500 text-sm">{errors.patientAge}</p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <input
+            name="patientGender"
+            value={formData.patientGender}
+            onChange={handleChange}
           placeholder="Patient Gender"
-          className="w-full border rounded p-2"
+          className={`w-full border rounded p-2 ${errors.patientGender ? 'border-red-500' : ''}`}
         />
+        {errors.patientGender && (
+          <p className="text-red-500 text-sm">{errors.patientGender}</p>
+        )}
+        </div>
         <textarea
           name="diagnosis"
           value={formData.diagnosis}
@@ -106,20 +161,30 @@ export default function AddPrescription() {
           placeholder="Diagnosis"
           className="w-full border rounded p-2"
         />
-        <input
-          name="prescriptionDate"
-          type="date"
-          value={formData.prescriptionDate}
-          onChange={handleChange}
-          className="w-full border rounded p-2"
-        />
-        <input
-          name="nextVisitDate"
-          type="date"
-          value={formData.nextVisitDate}
-          onChange={handleChange}
-          className="w-full border rounded p-2"
-        />
+        <div className="space-y-1">
+          <input
+            name="prescriptionDate"
+            type="date"
+            value={formData.prescriptionDate}
+            onChange={handleChange}
+            className={`w-full border rounded p-2 ${errors.prescriptionDate ? 'border-red-500' : ''}`}
+          />
+          {errors.prescriptionDate && (
+            <p className="text-red-500 text-sm">{errors.prescriptionDate}</p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <input
+            name="nextVisitDate"
+            type="date"
+            value={formData.nextVisitDate}
+            onChange={handleChange}
+            className={`w-full border rounded p-2 ${errors.nextVisitDate ? 'border-red-500' : ''}`}
+          />
+          {errors.nextVisitDate && (
+            <p className="text-red-500 text-sm">{errors.nextVisitDate}</p>
+          )}
+        </div>
         <textarea
           name="medicines"
           value={formData.medicines}
