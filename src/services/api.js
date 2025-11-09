@@ -34,13 +34,25 @@ export const addPrescription = async (data) => {
 export const updatePrescription = ( data ) =>
   axiosInstance.put(`/prescriptions`, data).then((res) => res.data);
 
-export const getPrescriptions = async () => {
-  const res = await axios.get(`${API_BASE_URL}/prescriptions`);
+export const getPrescriptions = async (params = {}) => {
+  // Ensure dates are properly formatted for the Spring @DateTimeFormat(iso = ISO.DATE)
+  const res = await axios.get(`${API_BASE_URL}/prescriptions`, {
+    params,
+    paramsSerializer: params => {
+      return Object.entries(params)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+    }
+  });
   return res.data;
 };
 
 export const getPrescriptionById = (id) =>
   axiosInstance.get(`/prescriptions/${id}`).then((res) => res.data);
+
+export const deletePrescription = async (id) => {
+  return axiosInstance.delete(`/prescriptions/${id}`);
+};
 
 // Medicines
 export const getMedicines = async () => {
@@ -51,5 +63,12 @@ export const getMedicines = async () => {
 // Dashboard
 export const getPrescriptionCounts = async () => {
   const res = await axios.get(`${API_BASE_URL}/prescriptions/count`);
+  return res.data;
+};
+
+export const getPrescriptionCountByDate = async (date) => {
+  const res = await axios.get(`${API_BASE_URL}/prescriptions/count`, {
+    params: { date }
+  });
   return res.data;
 };

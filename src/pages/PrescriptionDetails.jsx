@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { getPrescriptionById } from "../services/api";
+import { useParams, Link , useNavigate} from "react-router-dom";
+import { getPrescriptionById, deletePrescription } from "../services/api";
 
 export default function PrescriptionDetails() {
   const { id } = useParams();
@@ -20,6 +20,18 @@ export default function PrescriptionDetails() {
     };
     fetchData();
   }, [id]);
+
+  const navigate = useNavigate();
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this prescription?")) return;
+    try {
+      await deletePrescription(id);
+      navigate("/prescriptions");
+    } catch (err) {
+      alert("Failed to delete prescription.");
+    }
+  };
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
   if (!prescription) return <div className="text-center mt-10 text-red-600">Prescription not found.</div>;
@@ -75,7 +87,15 @@ export default function PrescriptionDetails() {
         >
             Edit Prescription
         </Link>
-        </div>
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Delete
+        </button>
+        
+      </div>
+      
     </div>
   );
 }

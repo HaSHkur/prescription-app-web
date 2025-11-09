@@ -19,7 +19,6 @@ export default function AddPrescription() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch existing prescription if editing
   useEffect(() => {
     if (id) {
       const fetchPrescription = async () => {
@@ -77,7 +76,6 @@ export default function AddPrescription() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate all fields before submission
     const newErrors = {};
     Object.keys(formData).forEach(field => {
       const error = validateField(field, formData[field]);
@@ -93,9 +91,8 @@ export default function AddPrescription() {
 
     try {
       if (id) {
-        // PUT request for edit (you may need to define it)
         formData.id = id;
-        await updatePrescription( formData ); // or updatePrescription()
+        await updatePrescription( formData );
         alert("Prescription updated successfully!");
       } else {
         await addPrescription(formData);
@@ -117,6 +114,22 @@ export default function AddPrescription() {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1">
+          <label htmlFor="prescriptionDate" className="block text-sm font-medium text-gray-700">
+            Prescription Date
+          </label>
+          <input
+            id="prescriptionDate"
+            name="prescriptionDate"
+            type="date"
+            value={formData.prescriptionDate}
+            onChange={handleChange}
+            className={`w-full border rounded p-2 ${errors.prescriptionDate ? 'border-red-500' : ''}`}
+          />
+          {errors.prescriptionDate && (
+            <p className="text-red-500 text-sm">{errors.prescriptionDate}</p>
+          )}
+        </div>
         <div className="space-y-1">
           <input
             name="patientName"
@@ -143,16 +156,20 @@ export default function AddPrescription() {
           )}
         </div>
         <div className="space-y-1">
-          <input
+          <select
             name="patientGender"
             value={formData.patientGender}
             onChange={handleChange}
-          placeholder="Patient Gender"
-          className={`w-full border rounded p-2 ${errors.patientGender ? 'border-red-500' : ''}`}
-        />
-        {errors.patientGender && (
-          <p className="text-red-500 text-sm">{errors.patientGender}</p>
-        )}
+            className={`w-full border rounded p-2 ${errors.patientGender ? 'border-red-500' : ''}`}
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          {errors.patientGender && (
+            <p className="text-red-500 text-sm">{errors.patientGender}</p>
+          )}
         </div>
         <textarea
           name="diagnosis"
@@ -161,20 +178,22 @@ export default function AddPrescription() {
           placeholder="Diagnosis"
           className="w-full border rounded p-2"
         />
+        
+        
+        <textarea
+          name="medicines"
+          value={formData.medicines}
+          onChange={handleChange}
+          placeholder="Medicines"
+          className="w-full border rounded p-2"
+        />
+
         <div className="space-y-1">
+          <label htmlFor="nextVisitDate" className="block text-sm font-medium text-gray-700">
+            Next Visit Date
+          </label>
           <input
-            name="prescriptionDate"
-            type="date"
-            value={formData.prescriptionDate}
-            onChange={handleChange}
-            className={`w-full border rounded p-2 ${errors.prescriptionDate ? 'border-red-500' : ''}`}
-          />
-          {errors.prescriptionDate && (
-            <p className="text-red-500 text-sm">{errors.prescriptionDate}</p>
-          )}
-        </div>
-        <div className="space-y-1">
-          <input
+            id="nextVisitDate"
             name="nextVisitDate"
             type="date"
             value={formData.nextVisitDate}
@@ -185,13 +204,6 @@ export default function AddPrescription() {
             <p className="text-red-500 text-sm">{errors.nextVisitDate}</p>
           )}
         </div>
-        <textarea
-          name="medicines"
-          value={formData.medicines}
-          onChange={handleChange}
-          placeholder="Medicines"
-          className="w-full border rounded p-2"
-        />
 
         <button
           type="submit"
