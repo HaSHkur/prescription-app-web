@@ -23,6 +23,8 @@ export default function Medicines() {
           ))}
         </tbody>
       </table>
+            <p className="mt-4 text-gray-600">*It was intended to show the data from provided REST API here, But the API is deprecated and Currently Unavailable</p>
+
     </div>
   );
 }

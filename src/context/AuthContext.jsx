@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const data = await loginUser(username, password);
-      // Store the token
       localStorage.setItem("token", data.token);
       setToken(data.token);
       navigate("/prescriptions");
